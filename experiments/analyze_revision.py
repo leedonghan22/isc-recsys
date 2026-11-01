@@ -117,18 +117,18 @@ def main():
                 dlt = gam - 1.0
                 rows.append({"dataset": r.dataset, "model": r.model, "K": r.K, "group": grp,
                              "gamma": gam, "gamma_acc": B / A if A > 0 else np.nan,
-                             "second": A * dlt ** 2, "first": 2 * dlt * (A - B)})
+                             "second_order": A * dlt ** 2, "first_order": 2 * dlt * (A - B)})
         dec = pd.DataFrame(rows)
         if not dec.empty:
-            dec["total"] = dec.second + dec.first
+            dec["total"] = dec["second_order"] + dec["first_order"]
             summ = (dec.groupby(["dataset", "model", "K", "group"], sort=False)
-                    [["gamma", "gamma_acc", "second", "first", "total"]].mean().reset_index())
-            summ["first-order share"] = (summ["first"].abs()
-                                         / (summ["first"].abs() + summ.second.abs())).map(
+                    [["gamma", "gamma_acc", "second_order", "first_order", "total"]].mean().reset_index())
+            summ["first-order share"] = (summ["first_order"].abs()
+                                         / (summ["first_order"].abs() + summ["second_order"].abs())).map(
                 lambda v: f"{100 * v:.0f}%" if np.isfinite(v) else "–")
             summ["dataset"] = summ.dataset.map(NAMES)
             summ = summ[summ.K == 20].round(4)
-            summ = summ.rename(columns={"second": "ΔMSE 2nd-order", "first": "ΔMSE 1st-order",
+            summ = summ.rename(columns={"second_order": "ΔMSE 2nd-order", "first_order": "ΔMSE 1st-order",
                                         "total": "ΔMSE total"})
             sections.append(("D. Accuracy-cost decomposition on test at K=20 "
                              "(per group, mean over seeds)", summ))
