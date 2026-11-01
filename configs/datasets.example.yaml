@@ -1,10 +1,12 @@
 # Copy this file to  configs/datasets.yaml  and set the paths to your local data.
 # The datasets themselves are NOT redistributed here (see README for download links).
+# Relative paths are resolved against the repository root, so the default layout
+# below works as soon as the files are placed in the data/ folders.
 
 ml-10m:
-  path: /path/to/MovieLens10M      # folder containing ratings.dat
+  path: data/ml-10m        # folder containing ratings.dat (MovieLens 10M)
 ml-1m:
-  path: /path/to/MovieLens1M       # folder containing ratings.dat
+  path: data/ml-1m         # folder containing ratings.dat (MovieLens 1M)
 books:
-  path: /path/to/AmazonBooks       # folder containing the reviews file
-  file: Books_5.json               # one JSON object per line (Amazon review dump)
+  path: data/books         # folder containing the reviews file
+  file: Books_5.json       # unzipped, one JSON object per line (Amazon 2018 5-core)

@@ -1,0 +1,8 @@
+# local data and outputs are never committed (datasets are not redistributable)
+data/*/
+!data/README.md
+results/
+configs/datasets.yaml
+__pycache__/
+*.pyc
+.venv/

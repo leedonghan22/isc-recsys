@@ -64,7 +64,10 @@ class Config:
         return {"ml-10m": 10_000, "ml-1m": 6_040, "books": None}[self.dataset]
 
     def data_path(self) -> str:
-        return load_dataset_paths()[self.dataset]["path"]
+        """Absolute paths are used as-is; relative paths (e.g. data/ml-1m) are
+        resolved against the repository root, so runs work from any folder."""
+        p = os.path.expanduser(load_dataset_paths()[self.dataset]["path"])
+        return p if os.path.isabs(p) else os.path.join(_ROOT, p)
 
     def data_file(self) -> Optional[str]:
         return load_dataset_paths()[self.dataset].get("file")

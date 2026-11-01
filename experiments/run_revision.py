@@ -96,6 +96,11 @@ def run_dataset(ds, a):
     os.makedirs(a.out_dir, exist_ok=True)
     save = lambda df, name: C.save_csv(pd.DataFrame(df), a.out_dir, f"{tag}_{name}.csv")
 
+    need = os.path.join(cfg.data_path(), cfg.data_file() or "ratings.dat")
+    if not os.path.isfile(need):
+        raise SystemExit(f"\n[data missing] {need}\n"
+                         f"Put the {ds} file there, or fix the path in configs/datasets.yaml "
+                         f"(see data/README.md).\n")
     log(f"{ds}: loading and splitting (device={device})")
     prep = R.prepare_strict(cfg, split_seed=a.split_seed)
     gs = pd.Series({u: prep["groups"].get(u, "neutral") for u in prep["users"]}).value_counts()
