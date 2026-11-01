@@ -75,6 +75,44 @@ Notes:
 - **Determinism.** Seeds are fixed per run; exact figures can still vary slightly
   with hardware/BLAS and PyTorch versions.
 
+## Revised evaluation protocol (resubmission)
+
+All numbers in the revised manuscript come from one driver per dataset:
+
+```bash
+python experiments/run_revision.py --dataset ml-1m --quick   # smoke test (minutes)
+python experiments/run_revision.py --dataset all             # full run
+python experiments/make_revision_tables.py                   # tables + figure
+```
+
+Protocol (`src/revision.py`):
+
+- **Split.** Temporal 3-way split per user: test = 5 most recent interactions,
+  validation = the 5 before them, training = the rest. Split seed 0; MF seeds 0-4.
+- **No leakage.** The base MF is trained on training data only, harsh/generous
+  groups are defined on training data only, (gamma_H, gamma_G) are tuned on the
+  validation fold, and the test fold is evaluated once with frozen factors.
+- **Candidate set.** Items with >= 100 training interactions (all datasets).
+  Relevant held-out items outside this catalog are excluded from the Recall
+  denominator; users with no relevant in-catalog item are not evaluated.
+  Books additionally keeps users with >= 100 reviews in `Books_5.json` before
+  splitting. ML-10M uses the first 10,000 distinct user IDs in file order.
+- **Already-observed items** (training items when ranking for validation;
+  training + validation items when ranking for test) are excluded from the full
+  ranking. `--no_mask_seen` restores the original behaviour (no exclusion).
+- **Tuning.** Same anti-symmetric sign update as `src/isc.py`
+  (step = gamma_lr * (1 + lam_mult) = 0.0199; tolerance
+  eps = max(0.2 * |baseline validation gap|, 1e-4); at most 500 iterations).
+  A run fails if it does not converge or any gamma leaves [1/5, 5]; a failed
+  run reverts to gamma = 1 ("fallback"). Both raw and fallback results are reported.
+- **Uncertainty.** User-level bootstrap (1,000 resamples within each group) for
+  the gap; t-based 95% CIs across the five MF seeds.
+- **Comparators.** Validation grid search over (gamma_H, gamma_G) in
+  [1/4, 4]^2 (17 x 17 log grid) at K=20; an L2-regularised MF whose
+  (L2, d) is chosen on validation RMSE from {0.001, 0.01, 0.1} x {5, 32}.
+- **Diagnostics.** Item-bias-only and popularity rankers, group descriptives,
+  and gamma_acc = B_g / A_g on train / validation / test.
+
 ## Method summary
 
 For user `u`, item `i`, biased MF predicts `r = mu + b_u + b_i + p_u . q_i`.
