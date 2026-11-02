@@ -140,6 +140,12 @@ def run_dataset(ds, a):
             else:
                 mf = R.train_mf(prep, cfg, device, seed=seed, reg=reg, latent_factors=d)
             log(f"{ds}: {mname} seed {seed} trained")
+            if a.save_factors:
+                fd = os.path.join(a.out_dir, "factors")
+                os.makedirs(fd, exist_ok=True)
+                torch.save({"state_dict": mf.state_dict(), "users": prep["users"], "items": prep["items"],
+                            "reg": reg, "d": d, "seed": seed},
+                           os.path.join(fd, f"{ds}_{mname}_seed{seed}.pt"))
             mask = not a.no_mask_seen
             rv = R.Ranker(mf, prep, prep["val"], [prep["train_raw"]], thr, "groups", mask)
             rt = R.Ranker(mf, prep, prep["test"], [prep["train_raw"], prep["val"]], thr, "all", mask)
@@ -230,6 +236,7 @@ def main():
     p.add_argument("--no_mask_seen", action="store_true",
                    help="rank already-observed items too (original protocol)")
     p.add_argument("--skip_ks", action="store_true")
+    p.add_argument("--save_factors", action="store_true", help="save trained MF parameters per model and seed")
     p.add_argument("--quick", action="store_true", help="1 seed, 2 epochs, K=20 only")
     p.add_argument("--epochs", type=int, default=None, help="override MF epochs (default 50)")
     p.add_argument("--device", default=None, help="cpu / cuda / mps (default: auto)")

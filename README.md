@@ -83,6 +83,11 @@ All numbers in the revised manuscript come from one driver per dataset:
 python experiments/run_revision.py --dataset ml-1m --quick   # smoke test (minutes)
 python experiments/run_revision.py --dataset all             # full run
 python experiments/make_revision_tables.py                   # tables + figure
+python experiments/analyze_revision.py                       # paired tests, detectability
+python experiments/analyze_novelty.py                        # group NDCG, gate, cost forecast, Fig1/Fig2
+python experiments/run_ablation.py --dataset ml-10m          # scaling-strategy ablation (K=20)
+python experiments/export_artifacts.py --dataset all         # exact splits, groups, catalogs, shares
+python experiments/run_revision.py --dataset all --save_factors   # also store trained MF factors
 ```
 
 Protocol (`src/revision.py`):
@@ -112,6 +117,12 @@ Protocol (`src/revision.py`):
   (L2, d) is chosen on validation RMSE from {0.001, 0.01, 0.1} x {5, 32}.
 - **Diagnostics.** Item-bias-only and popularity rankers, group descriptives,
   and gamma_acc = B_g / A_g on train / validation / test.
+- **Validation gate.** Calibrate only when the user-level bootstrap interval of
+  the validation gap excludes zero (`val_measurable` in the CSV); otherwise keep gamma = 1.
+- **Cost forecast.** dMSE_g = A_g (g-1)^2 + 2 A_g (1 - gamma_acc_g)(g-1), evaluated
+  with validation A_g and gamma_acc_g, weighted by the group shares of held-out pairs.
+- **Ablation.** ISC versus rank-equivalent item-bias scaling, whole-score scaling,
+  user-bias shift, a single global factor, and one-sided factors.
 
 ## Method summary
 
