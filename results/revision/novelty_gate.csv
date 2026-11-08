@@ -1,0 +1,5 @@
+Dataset,Runs,Calibrated by gate,Pooled red. ungated,Pooled red. gated,Runs widened ungated,Runs widened gated,Mean dRMSE% ungated,Mean dRMSE% gated
+ML-10M,25,10/25,57%,49%,6/25,1/25,+0.18,+0.12
+ML-1M,25,1/25,26%,0%,10/25,0/25,+0.11,+0.03
+Books,25,6/25,48%,20%,2/25,0/25,+10.77,+4.48
+All,75,17/75,41%,21%,18/75,1/75,+3.69,+1.54

@@ -1,0 +1,2 @@
+dataset,users,ratings,mean,variance,skewness,share_5_star
+ml-1m,6040,1000209,3.5816,1.2479,-0.5536,0.2263

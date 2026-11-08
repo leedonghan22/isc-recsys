@@ -1,8 +1,16 @@
-# local data and outputs are never committed (datasets are not redistributable)
+# Local data and outputs that must not be committed.
+# The datasets are not redistributable (see data/README.md).
 data/*/
 !data/README.md
-results/
 configs/datasets.yaml
 __pycache__/
 *.pyc
 .venv/
+
+# Results: commit results/revision/ (per-run CSVs, configs, tables, figures and
+# the release/ artifacts). Folds with ratings and trained factors stay local.
+results/*
+!results/revision/
+results/revision/artifacts/*/local/
+results/revision/factors/
+results/revision/*.png

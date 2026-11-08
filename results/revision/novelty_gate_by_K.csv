@@ -1,0 +1,10 @@
+Cutoffs,Validation gap,Runs,Pooled red.,Improved
+K = 5,not detectable,15,-14%,5/15
+K = 10,detectable,1,80%,1/1
+K = 10,not detectable,14,12%,8/14
+K = 20,detectable,3,5%,2/3
+K = 20,not detectable,12,37%,11/12
+K >= 20,detectable,16,62%,15/16
+K >= 20,not detectable,29,37%,25/29
+K >= 50,detectable,13,64%,13/13
+K >= 50,not detectable,17,37%,14/17

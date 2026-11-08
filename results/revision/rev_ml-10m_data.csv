@@ -1,0 +1,2 @@
+users_in_catalog_index,items_in_catalog,train_rows_raw,train_rows_after_item_filter,val_rows,test_rows,min_item_ratings_in_train,harsh,generous,neutral,mask_seen
+10000,2385,1302478,1144516,50000,50000,100,314,842,8844,True

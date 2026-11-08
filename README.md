@@ -45,37 +45,10 @@ The datasets are public and are **not** redistributed here:
 
 ## Reproducing the paper
 
-Every driver reads `configs/datasets.yaml`, runs the experiment, and writes a CSV
-to `results/`. `--dataset` selects `ml-10m`, `ml-1m`, `books`, or `all`.
+Every driver reads `configs/datasets.yaml` and writes CSV files to `results/`.
+`--dataset` selects `ml-10m`, `ml-1m`, `books`, or `all`.
 
-| Paper item | Command |
-|---|---|
-| Table 3 (main results, K=20) | `python experiments/run_main.py --dataset all` |
-| Table 4 + Table S4 (cutoff sweep / transfer matrix) | `python experiments/run_cutoffs.py --dataset all` |
-| Table 7 (validation-to-test) | `python experiments/run_valtest.py --dataset all` |
-| Table 5 / Table 6 / S1 (synthetic skewness sweep) | `python experiments/run_synthetic_sweep.py --seeds 5` |
-| S2 (post-processing baselines) | `python experiments/run_baselines.py --dataset ml-10m` |
-| Figure 1 / S3 (cross-seed reliability, 20 seeds) | `python experiments/run_seeds.py --dataset all --n_seeds 20` |
-| S5 (threshold sensitivity) | `python experiments/run_threshold.py --dataset all` |
-| S5 (latent-dimension sweep) | `python experiments/run_latent_sweep.py --dataset all` |
-
-Notes:
-
-- **Cutoffs / groups.** Evaluation is anchored at K=20 with sweeps over
-  {5,10,20,50,100}. Harsh/generous groups use positivity thresholds (0.2, 0.8),
-  defined on the raw training frame before the item filter.
-- **Reliability studies use 20 seeds** on every dataset (`run_seeds.py`,
-  `--n_seeds 20`); this single driver covers the ML-10M, ML-1M, and Books
-  reliability numbers. The synthetic sweep uses 5 seeds per skew level
-  (`run_synthetic_sweep.py --seeds 5`), as in the paper.
-- **Compute.** ISC tuning evaluates full-ranking Recall@K at every iteration, so
-  large runs (ML-10M/Books at high K) are compute-heavy; this matches the
-  evaluation protocol in the paper. A CUDA or Apple-MPS device is used
-  automatically when available.
-- **Determinism.** Seeds are fixed per run; exact figures can still vary slightly
-  with hardware/BLAS and PyTorch versions.
-
-## Revised evaluation protocol (resubmission)
+### Manuscript and Supplementary Sections S1-S5 (leakage-free protocol)
 
 All numbers in the revised manuscript come from one driver per dataset:
 
@@ -86,7 +59,8 @@ python experiments/make_revision_tables.py                   # tables + figure
 python experiments/analyze_revision.py                       # paired tests, detectability
 python experiments/analyze_novelty.py                        # group NDCG, gate, cost forecast, Fig1/Fig2
 python experiments/run_ablation.py --dataset ml-10m          # scaling-strategy ablation (K=20)
-python experiments/export_artifacts.py --dataset all         # exact splits, groups, catalogs, shares
+python experiments/export_artifacts.py --dataset all         # folds, groups, catalogs, rating stats, checksums
+python experiments/export_artifacts.py --dataset all --verify   # check regenerated folds against the checksums
 python experiments/run_revision.py --dataset all --save_factors   # also store trained MF factors
 ```
 
@@ -124,21 +98,72 @@ Protocol (`src/revision.py`):
 - **Ablation.** ISC versus rank-equivalent item-bias scaling, whole-score scaling,
   user-bias shift, a single global factor, and one-sided factors.
 
+### Released artifacts and data licence
+
+`export_artifacts.py` writes two folders per dataset under `results/revision/artifacts/<ds>/`:
+
+- `release/` (archived): catalog item ids, every user's relative positivity and group,
+  group shares of held-out pairs, rating statistics (Table 1 skewness, 5-star share),
+  and `checksums.sha256` with the SHA-256 of the canonical CSV of each fold.
+- `local/` (never committed): the training, validation and test folds themselves.
+
+The MovieLens licence does not permit redistribution of the ratings, and the Amazon
+ratings are not redistributed either. Download the original files, run
+`export_artifacts.py`, and use `--verify` to confirm that the regenerated folds match
+the archived checksums. Trained factors (`--save_factors`) are also kept local.
+
+### In-sample same-fold experiments (Supplementary Section S6 only)
+
+These drivers reproduce the same-fold results that the Supplementary Information
+retains as in-sample upper bounds. They tune and evaluate on the same fold and are
+not used for any number in the main text.
+
+| Paper item | Command |
+|---|---|
+| Table 3 (main results, K=20) | `python experiments/run_main.py --dataset all` |
+| Table 4 + Table S4 (cutoff sweep / transfer matrix) | `python experiments/run_cutoffs.py --dataset all` |
+| Table 7 (validation-to-test) | `python experiments/run_valtest.py --dataset all` |
+| Table 5 / Table 6 / S1 (synthetic skewness sweep) | `python experiments/run_synthetic_sweep.py --seeds 5` |
+| S2 (post-processing baselines) | `python experiments/run_baselines.py --dataset ml-10m` |
+| Figure 1 / S3 (cross-seed reliability, 20 seeds) | `python experiments/run_seeds.py --dataset all --n_seeds 20` |
+| S5 (threshold sensitivity) | `python experiments/run_threshold.py --dataset all` |
+| S5 (latent-dimension sweep) | `python experiments/run_latent_sweep.py --dataset all` |
+
+Notes:
+
+- **Cutoffs / groups.** Evaluation is anchored at K=20 with sweeps over
+  {5,10,20,50,100}. Harsh/generous groups use positivity thresholds (0.2, 0.8),
+  defined on the raw training frame before the item filter.
+- **Reliability studies use 20 seeds** on every dataset (`run_seeds.py`,
+  `--n_seeds 20`); this single driver covers the ML-10M, ML-1M, and Books
+  reliability numbers. The synthetic sweep uses 5 seeds per skew level
+  (`run_synthetic_sweep.py --seeds 5`), as in the paper.
+- **Compute.** ISC tuning evaluates full-ranking Recall@K at every iteration, so
+  large runs (ML-10M/Books at high K) are compute-heavy; this matches the
+  evaluation protocol in the paper. A CUDA or Apple-MPS device is used
+  automatically when available.
+- **Determinism.** Seeds are fixed per run; exact figures can still vary slightly
+  with hardware/BLAS and PyTorch versions.
+
+## Revised evaluation protocol (resubmission)
+
 ## Method summary
 
 For user `u`, item `i`, biased MF predicts `r = mu + b_u + b_i + p_u . q_i`.
 ISC replaces the interaction term with `gamma_g(u) * (p_u . q_i)` and tunes
-`(gamma_H, gamma_G)` by:
+`(gamma_H, gamma_G)` on the validation fold by an anti-symmetric sign update:
 
 ```
-a = gamma_lr * (1 + lambda / lambda_max),   lambda = lam_mult * lambda_max
-repeat:  s = sign(RecallGap_H - RecallGap_G)
-         gamma_H *= (1 + a*s);  gamma_G /= (1 + a*s)
+alpha = 0.0199                       # = gamma_lr * (1 + lam_mult) in src/isc.py
+repeat:  s = sign(Recall_H - Recall_G)            # validation fold, cutoff K
+         gamma_H *= (1 + alpha*s);  gamma_G /= (1 + alpha*s)
 until |gap| <= eps = max(0.2 * |gap_baseline|, 1e-4)
+fail if 500 iterations pass or any gamma leaves [1/5, 5]  -> fallback gamma = 1
 ```
 
-with the stability bound `lambda_max = A_G / C_G` computed from the interaction
-scores. See `src/isc.py`.
+The update keeps `gamma_H * gamma_G = 1`; with the cap of 5 a capped run needs at
+least 82 iterations (81 if gamma_H shrinks). `src/isc.py` still computes a legacy
+`lambda_max`, but it cancels from the step size and has no effect on the update.
 
 ## License
 
