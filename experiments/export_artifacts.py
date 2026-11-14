@@ -8,7 +8,9 @@ Per dataset, two folders are written under results/revision/artifacts/<ds>/:
 
   release/   files that can be archived (identifiers and statistics, no ratings)
     catalog.csv          catalog item ids (>= 100 training interactions) and their counts
-    groups.csv           user_id, relative positivity rho_u, group (harsh/generous/neutral)
+    groups.csv           user_id, relative positivity rho_u, group (harsh/generous/neutral),
+                         in_catalog_index (True if the user has an in-catalog training
+                         interaction; the paper's group counts refer to these users)
     shares.csv           share of in-catalog held-out rated pairs per group (val and test)
     rating_stats.csv     users, ratings, mean, variance, skewness, share of 5-star ratings
     checksums.sha256     SHA-256 of the canonical CSV of train_raw, val and test
@@ -90,6 +92,9 @@ def export(ds, p, rel, loc):
     cnt.sort_values("item_id").to_csv(os.path.join(rel, "catalog.csv"), index=False, lineterminator="\n")
     rho = positivity(p["train_raw"]).rename("rho").reset_index()
     rho["group"] = rho.user_id.map(lambda u: p["groups"].get(u, "neutral"))
+    # users with at least one in-catalog training interaction; only these are scored
+    # and evaluated, and the group counts reported in the paper refer to them
+    rho["in_catalog_index"] = rho.user_id.isin(p["u2i"])
     rho.sort_values("user_id").to_csv(os.path.join(rel, "groups.csv"), index=False, lineterminator="\n")
 
     rows = []

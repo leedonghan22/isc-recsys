@@ -102,7 +102,8 @@ Protocol (`src/revision.py`):
 
 `export_artifacts.py` writes two folders per dataset under `results/revision/artifacts/<ds>/`:
 
-- `release/` (archived): catalog item ids, every user's relative positivity and group,
+- `release/` (archived): catalog item ids, every user's relative positivity and group
+  (with `in_catalog_index`, which marks the users that are scored and evaluated),
   group shares of held-out pairs, rating statistics (Table 1 skewness, 5-star share),
   and `checksums.sha256` with the SHA-256 of the canonical CSV of each fold.
 - `local/` (never committed): the training, validation and test folds themselves.

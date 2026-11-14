@@ -1,0 +1,17 @@
+\begin{table}[h]
+\centering
+\caption{K=20: regularised base model and validation grid-search comparator (mean over seeds).}
+\small
+\begin{tabular}{lllllllll}
+\toprule
+Dataset & Base model & reg / d & RMSE base & |Δ| base & |Δ| ISC & |Δ| grid & Recall overall base/ISC/grid & RMSE ISC / grid \\
+\midrule
+ML-10M & MF (unregularised) & 0.0 / 5 & 0.9670 & 0.0055 & 0.0033 & 0.0048 & 0.0266 / 0.0269 / 0.0265 & 0.9685 / 1.0003 \\
+ML-10M & MF (L2, val-tuned) & 0.1 / 5 & 0.9025 & 0.0148 & 0.0066 & 0.0050 & 0.0281 / 0.0275 / 0.0275 & 0.9058 / 0.9053 \\
+ML-1M & MF (unregularised) & 0.0 / 5 & 0.9727 & 0.0100 & 0.0078 & 0.0135 & 0.0385 / 0.0386 / 0.0380 & 0.9730 / 0.9817 \\
+ML-1M & MF (L2, val-tuned) & 0.1 / 5 & 0.9306 & 0.0139 & 0.0110 & 0.0048 & 0.0374 / 0.0371 / 0.0371 & 0.9317 / 0.9321 \\
+Books & MF (unregularised) & 0.0 / 5 & 0.9534 & 0.0033 & 0.0014 & 0.0037 & 0.0038 / 0.0037 / 0.0038 & 1.0376 / 1.0108 \\
+Books & MF (L2, val-tuned) & 0.1 / 5 & 0.8527 & 0.0023 & 0.0027 & 0.0022 & 0.0064 / 0.0064 / 0.0065 & 0.8564 / 0.8598 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,7 @@
+dataset,group,mean_std_s,std_b_i,ratio
+books,generous,0.2657,0.3105,0.8555
+books,harsh,0.4885,0.3105,1.5731
+ml-10m,generous,0.4993,0.5061,0.9864
+ml-10m,harsh,0.5915,0.5061,1.1687
+ml-1m,generous,0.4498,0.5837,0.7706
+ml-1m,harsh,0.5423,0.5837,0.9291

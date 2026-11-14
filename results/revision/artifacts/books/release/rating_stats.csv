@@ -1,0 +1,2 @@
+dataset,users,ratings,mean,variance,skewness,share_5_star
+books,23337,5279932,4.3211,0.8263,-1.4556,0.5437
