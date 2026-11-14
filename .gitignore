@@ -14,3 +14,6 @@ results/*
 results/revision/artifacts/*/local/
 results/revision/factors/
 results/revision/*.png
+
+# Local installer, not part of the project
+get-pip.py

@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the article and this software archive."
+title: "isc-recsys: Interaction-Score Calibration for ranking parity in latent-factor recommender systems"
+type: software
+authors:
+  - family-names: Lee
+    given-names: Donghan
+    affiliation: "Department of Mathematics, Ajou University"
+  - family-names: Kwon
+    given-names: Soon-Sun
+    affiliation: "Department of Mathematics, Ajou University"
+repository-code: "https://github.com/leedonghan22/isc-recsys"
+license: MIT
+version: "1.0.0"
+keywords:
+  - recommender systems
+  - calibration
+  - user-side fairness
+  - matrix factorization
